@@ -83,7 +83,13 @@ loss_function_dict = {
 def main(args):
     log_freq = math.ceil(args.optimization_steps / 150)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+        
     dtype = torch.float32
 
     torch.set_default_dtype(dtype)

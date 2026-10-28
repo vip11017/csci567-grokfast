@@ -90,8 +90,13 @@ def multiplication_mod_p_data(p, eq_token, op_token):
 def main(args):
     torch.manual_seed(args.seed)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+        
     # tokens for <op> and <=>. It's not clear why <=> is needed at all since it
     # has no effect on the output, but we'll leave it in to best follow the
     # paper.
