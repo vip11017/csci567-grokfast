@@ -96,7 +96,9 @@ def main(args):
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
-        
+
+    print(f"Using Device: {device}")
+
     # tokens for <op> and <=>. It's not clear why <=> is needed at all since it
     # has no effect on the output, but we'll leave it in to best follow the
     # paper.

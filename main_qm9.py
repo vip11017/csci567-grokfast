@@ -70,7 +70,10 @@ def main(args):
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
-        
+
+    print(f"Using Device: {device}")
+
+
     # Load the QM9 small molecule dataset
     dset = QM9('.')
     dset = dset[:args.size]

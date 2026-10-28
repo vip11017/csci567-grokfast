@@ -111,7 +111,10 @@ def main(args):
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
-        
+
+    print(f"Using Device: {device}")
+
+
     base_csv = './IMDB-Dataset.csv'
     df = pd.read_csv(base_csv)
 

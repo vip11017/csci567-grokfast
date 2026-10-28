@@ -89,6 +89,9 @@ def main(args):
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
+
+    print(f"Using Device: {device}")
+
         
     dtype = torch.float32
 
