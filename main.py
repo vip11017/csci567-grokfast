@@ -219,6 +219,9 @@ def main(args):
                 stop = i - first_hit >= args.stop_patience
             else:
                 first_hit = None
+        # Abort runs that never fit the training set (e.g. very strong L2 decay).
+        abort = args.abort_step is not None and i >= args.abort_step and train_acc[-1] < args.abort_train_acc
+        stop = stop or abort
 
         last_epoch = e == int(args.budget) // steps_per_epoch - 1
         if args.save_weights:
@@ -265,6 +268,9 @@ def main(args):
 
             torch.save(results, f"{args.out_dir}/res_{args.label}.pt")
 
+        if abort:
+            print(f"Aborting at step {i}: train acc {train_acc[-1]:.3f} < {args.abort_train_acc}")
+            break
         if stop:
             print(f"Stopping at step {i}: val acc >= {args.stop_threshold} since step {first_hit}")
             break
@@ -298,6 +304,8 @@ if __name__ == "__main__":
     parser.add_argument("--stop_threshold", type=float, default=None)
     parser.add_argument("--stop_patience", type=int, default=1000)
     parser.add_argument("--out_dir", default="results")
+    parser.add_argument("--abort_step", type=int, default=None)
+    parser.add_argument("--abort_train_acc", type=float, default=0.5)
     args = parser.parse_args()
     os.makedirs(args.out_dir, exist_ok=True)
 

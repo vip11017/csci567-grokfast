@@ -7,7 +7,9 @@ Grid on x*y mod 97 (main.py), seeds 0-2:
 
 Skipped: AdamW at weight decay 0 (identical to Adam) and Adam/none/0 (the replication
 baseline, already in results/replication). Runs stop once val accuracy has held >= 95%
-for 1,000 steps, or at --budget steps.
+for 1,000 steps, or at --budget steps. Runs whose train accuracy is still below 50% at
+step 20,000 are aborted as failures (strong coupled L2 decay keeps the model from
+fitting at all, and those runs would otherwise use the whole budget).
 
 Runs are queued seed by seed, so a partial sweep still covers every config for seed 0.
 Finished runs leave a done_<name>.txt marker, and restarting the script skips them.
@@ -39,7 +41,8 @@ def build_runs(seeds, budget, out):
                     cmd = [sys.executable, "main.py", "--label", label, "--seed", str(seed),
                            "--optimizer", optimizer, "--weight_decay", str(wd),
                            "--budget", str(budget), "--stop_threshold", "0.95",
-                           "--stop_patience", "1000", "--out_dir", out]
+                           "--stop_patience", "1000", "--abort_step", "20000",
+                           "--abort_train_acc", "0.5", "--out_dir", out]
                     if filt == "ema":
                         cmd += EMA
                     runs.append({"name": name, "cmd": cmd})
