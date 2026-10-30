@@ -1,0 +1,215 @@
+<title>Grokfast Project Brief</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one printable letter page. Header, a full-width claim band, two columns (paper | our work), a footer strip of questions. */
+:root {
+  --bg: #ffffff;
+  --fg: #1c2230;
+  --muted: #5b6475;
+  --rule: #d9dde5;
+  --tint: #eef2f8;
+  --accent: #2f4f86;
+  --ours: #1f6b4f;
+  --warn: #8a4b0f;
+  --display: "Newsreader", Georgia, "Times New Roman", serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161f; --fg: #e3e7ef; --muted: #9aa3b4; --rule: #2c3442;
+    --tint: #1b2230; --accent: #8fb0e6; --ours: #74c7a3; --warn: #e3a566;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161f; --fg: #e3e7ef; --muted: #9aa3b4; --rule: #2c3442;
+  --tint: #1b2230; --accent: #8fb0e6; --ours: #74c7a3; --warn: #e3a566;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 14px/1.45 var(--body);
+}
+.page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding-block: 28px 36px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 18px;
+}
+header {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline;
+  gap: 6px 24px; border-bottom: 2px solid var(--fg); padding-bottom: 10px;
+}
+h1 { font: 600 30px/1.1 var(--display); margin: 0; text-wrap: balance; }
+.meta { color: var(--muted); font-size: 12.5px; }
+.meta a { color: var(--accent); }
+h2 {
+  font: 700 11px/1 var(--body); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--accent); margin: 0 0 8px;
+}
+h3 { font: 600 16px/1.25 var(--display); margin: 0 0 4px; }
+p { margin: 0; }
+.claim { background: var(--tint); border-radius: 4px; padding: 14px 16px; }
+.claim p { font: 500 18px/1.4 var(--display); text-wrap: pretty; }
+.claim .how { font: 400 13px/1.5 var(--body); color: var(--muted); margin-top: 8px; }
+code, .num { font-family: var(--mono); font-size: .86em; }
+.num { font-variant-numeric: tabular-nums; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.cols > section { min-width: 0; display: grid; gap: 14px; align-content: start; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: left; vertical-align: top; padding: 5px 8px 5px 0; border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; color: var(--muted); font-size: 11.5px; }
+td.r, th.r { text-align: right; padding-right: 0; padding-left: 12px; white-space: nowrap; }
+.ours { color: var(--ours); font-weight: 600; }
+.flag { color: var(--warn); }
+ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.small { font-size: 12.5px; }
+.hyp { border-left: 3px solid var(--accent); padding-left: 12px; display: grid; gap: 5px; }
+.hyp .lbl { font-weight: 700; }
+.also { display: grid; gap: 4px; font-size: 12.5px; }
+footer { border-top: 1px solid var(--rule); padding-top: 12px; }
+footer ol { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; }
+@media (max-width: 720px) {
+  .cols { grid-template-columns: 1fr; }
+  h1 { font-size: 25px; }
+}
+@page { size: letter; margin: 0.4in; }
+@media print {
+  :root { --bg: #fff; --fg: #111; --muted: #444; --rule: #ccc; --tint: #eef2f8; --accent: #2f4f86; --ours: #1f6b4f; --warn: #8a4b0f; color-scheme: light; }
+  body { font-size: 9.3pt; }
+  .page { padding: 0; gap: 8px; max-width: none; }
+  h1 { font-size: 20pt; }
+  .claim { padding: 8px 10px; }
+  .claim p { font-size: 12pt; }
+  .claim .how { font-size: 8.8pt; margin-top: 4px; }
+  .cols { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cols > section { gap: 9px; }
+  table, .small, .also, footer ol { font-size: 8.6pt; }
+  th, td { padding: 3px 6px 3px 0; }
+  h3 { font-size: 11pt; }
+}
+</style>
+
+<div class="page">
+  <header>
+    <div>
+      <h1>Grokfast Project Brief</h1>
+      <div class="meta">CSCI 567 Final Project · Vishal Patel, Salman Sattar, Tomohiko Uemura, Chinenye Okoro</div>
+    </div>
+    <div class="meta">
+      Lee et al., <i>Grokfast: Accelerated Grokking by Amplifying Slow Gradients</i>,
+      <a href="https://arxiv.org/abs/2405.20233">arXiv:2405.20233</a>
+    </div>
+  </header>
+
+  <section class="claim">
+    <h2>Central claim</h2>
+    <p>Amplifying the slowly varying part of each parameter's gradient makes models that grok
+      generalize far sooner (about 50× fewer steps on modular arithmetic), because slow gradient
+      components drive generalization while fast components drive overfitting.</p>
+    <p class="how">Method: before each optimizer step, add λ × a low-pass filtered gradient
+      history to the current gradient. <code>ema = α·ema + (1−α)·g;&nbsp; g ← g + λ·ema</code>
+      (Grokfast-EMA), or a 100-step moving average (Grokfast-MA). Two lines in the training loop.</p>
+  </section>
+
+  <div class="cols">
+    <section>
+      <div>
+        <h2>Key experiments in the paper</h2>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Task (small data)</th><th>Model</th><th>Reported effect</th></tr></thead>
+            <tbody>
+              <tr><td>x·y mod 97, 50% train</td><td>2-layer Transformer</td>
+                <td>Steps to 95% val: <span class="num">39,890 → 790</span> (MA, 50×), <span class="num">910</span> (EMA, 44×)</td></tr>
+              <tr><td>MNIST, 1,000 images, 8× init</td><td>3-layer MLP</td>
+                <td>Steps to threshold <span class="num">44,022 → 2,001</span> (22×)</td></tr>
+              <tr><td>QM9, 100 molecules, 3× init</td><td>Graph CNN</td>
+                <td>Min val MSE <span class="num">0.00659 → 0.00348</span></td></tr>
+              <tr><td>IMDb, 1,000 reviews</td><td>2-layer LSTM</td>
+                <td>Best val acc <span class="num">84% → 90%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3>Ablations</h3>
+        <ul class="small">
+          <li>Window and gain sweeps have an interior optimum; stronger filtering is not always better.</li>
+          <li>Using only the averaged gradient (dropping the current one) is slower and unstable.</li>
+          <li>Starting the filter after 500 steps still reaches 95% val in <span class="num">1,920</span> steps.</li>
+          <li>Weight decay interacts strongly with the filter.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>What we'd flag</h3>
+        <ul class="small">
+          <li class="flag">The 50× combines two changes. The filter alone gives 13.6× (2,940 steps); adding weight decay 0.01 brings it to 50×. The baseline uses no weight decay.</li>
+          <li>The proof that gradient filtering equals update filtering assumes a linear optimizer (SGD, momentum), but the experiments use Adam.</li>
+          <li>One validation split serves both tuning and reporting; no seed variance for the speedups.</li>
+          <li>MNIST threshold is reported as 95% in a table but drawn at 85% in the figure.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <div>
+        <h2>Code: located, set up, and run</h2>
+        <p class="small">Team repo <a href="https://github.com/vip11017/csci567-grokfast">vip11017/csci567-grokfast</a>,
+          forked from the official code (<a href="https://github.com/ironjr/grokfast">ironjr/grokfast</a>), with Apple-silicon (MPS) support added.
+          Steps to 95% val on modular arithmetic, one seed each:</p>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Run</th><th class="r">Ours</th><th class="r">Paper</th></tr></thead>
+            <tbody>
+              <tr><td>Baseline (wd 0)</td><td class="r num ours">58,600</td><td class="r num">39,890</td></tr>
+              <tr><td>Grokfast-MA (w 100, λ 5, wd 0.01)</td><td class="r num ours">790</td><td class="r num">790</td></tr>
+              <tr><td>Grokfast-EMA (α 0.98, λ 2, wd 0.005)</td><td class="r num ours">910</td><td class="r num">910</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul class="small" style="margin-top:6px">
+          <li>The filtered runs match exactly. Our baseline was 1.5× slower, so seed variance alone moves the "50×" ratio a lot.</li>
+          <li>A re-run of Grokfast-MA on a second machine (Windows laptop, CPU only, ~6 min for 1,000 steps) hit 95% val at step <span class="num ours">790</span> again.</li>
+          <li>The script's "weight decay" goes into <code>torch.optim.Adam</code>, so it is coupled L2 regularization, not decoupled AdamW decay.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Draft alternative hypothesis</h2>
+        <div class="hyp">
+          <p><span class="lbl">Regularization, not gradient frequency, drives most of the speedup.</span>
+            The filter changes how fitting trades off against weight size; a well-tuned baseline
+            with weight decay alone may close most of the gap.</p>
+          <p class="small"><b>Prediction:</b> with matched optimizer, learning-rate search and seeds, a tuned
+            no-filter baseline (Adam-L2 and AdamW, decay up to 1.0) reaches 95% val in far fewer than 40k steps.</p>
+          <p class="small"><b>Test:</b> filter on/off × weight decay {0, 0.001, 0.005, 0.01, 0.05, 0.1, 1.0}, ≥3 seeds,
+            logging parameter and update norms. Report median steps to 95% on a held-out test split.</p>
+        </div>
+        <div class="also" style="margin-top:8px">
+          <p><b>Also drafted.</b> H1: it's ordinary momentum and step size (compare against tuned Adam β₁ and momentum SGD at matched update norms).
+            H3: the gains depend on induced grokking (MNIST across train sizes 1k–50k and init scales 1–8).</p>
+          <p><b>Mechanism check:</b> a high-pass control (<code>g + λ(g − ema)</code>) should not help if slow components are what matter.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <h2>Questions for the TAs</h2>
+    <ol>
+      <li>Is replication plus one well-controlled hypothesis (H2) enough scope, or should we also cover H1 or H3?</li>
+      <li>Compute: each baseline run takes ~40–60k steps, and we want ≥3 seeds per setting. Is there GPU access we should use (e.g. CARC)?</li>
+      <li>Does the high-pass control seem like a fair test of the paper's mechanism?</li>
+    </ol>
+  </footer>
+</div>
