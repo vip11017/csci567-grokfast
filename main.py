@@ -124,11 +124,15 @@ def main(args):
 
     # For most experiments we used AdamW optimizer with learning rate 10−3,
     # weight decay 1, β1 = 0.9, β2 = 0.98
+    if args.optimizer == "SGD":
+        optim_kwargs = dict(momentum=args.momentum)
+    else:
+        optim_kwargs = dict(betas=(args.beta1, args.beta2))
     optimizer = getattr(torch.optim, args.optimizer)(
         model.parameters(),
         lr=args.lr,
         weight_decay=args.weight_decay,
-        betas=(args.beta1, args.beta2),
+        **optim_kwargs,
     )
 
     #  linear learning rate warmup over the first 10 updates
@@ -182,6 +186,10 @@ def main(args):
                         grads = gradfilter_ma(model, grads=grads, window_size=args.window_size, lamb=args.lamb, trigger=trigger)
                     elif args.filter == "ema":
                         grads = gradfilter_ema(model, grads=grads, alpha=args.alpha, lamb=args.lamb)
+                    elif args.filter == "ema_hp":
+                        grads = gradfilter_ema_highpass(model, grads=grads, alpha=args.alpha, lamb=args.lamb)
+                    elif args.filter == "ema_rand":
+                        grads = gradfilter_ema_random(model, grads=grads, alpha=args.alpha, lamb=args.lamb)
                     else:
                         raise ValueError(f"Invalid gradient filter type `{args.filter}`")
 
@@ -276,7 +284,8 @@ if __name__ == "__main__":
     parser.add_argument("--optimizer", default="Adam")
 
     # Grokfast
-    parser.add_argument("--filter", type=str, choices=["none", "ma", "ema", "fir"], default="none")
+    parser.add_argument("--momentum", type=float, default=0.9, help="only used with --optimizer SGD")
+    parser.add_argument("--filter", type=str, choices=["none", "ma", "ema", "ema_hp", "ema_rand"], default="none")
     parser.add_argument("--alpha", type=float, default=0.99)
     parser.add_argument("--window_size", type=int, default=100)
     parser.add_argument("--lamb", type=float, default=5.0)
@@ -301,7 +310,7 @@ if __name__ == "__main__":
         filter_suffix = ''
     elif args.filter == 'ma':
         filter_suffix = window_size_str + lamb_str
-    elif args.filter == 'ema':
+    elif args.filter in ('ema', 'ema_hp', 'ema_rand'):
         filter_suffix = alpha_str + lamb_str
     else:
         raise ValueError(f"Unrecognized filter type {args.filter}")

@@ -48,3 +48,44 @@ def gradfilter_ema(
             p.grad.data = p.grad.data + grads[n] * lamb
 
     return grads
+
+
+# Control filters for testing whether the *slow* part of the gradient is what matters.
+# Both keep the same EMA state as gradfilter_ema.
+
+def gradfilter_ema_highpass(
+    m: nn.Module,
+    grads: Optional[Dict[str, torch.Tensor]] = None,
+    alpha: float = 0.98,
+    lamb: float = 2.0,
+) -> Dict[str, torch.Tensor]:
+    """Amplify the fast part instead: g + lamb * (g - EMA(g))."""
+    if grads is None:
+        grads = {n: p.grad.data.detach() for n, p in m.named_parameters() if p.requires_grad and p.grad is not None}
+
+    for n, p in m.named_parameters():
+        if p.requires_grad and p.grad is not None:
+            grads[n] = grads[n] * alpha + p.grad.data.detach() * (1 - alpha)
+            p.grad.data = p.grad.data + (p.grad.data - grads[n]) * lamb
+
+    return grads
+
+
+def gradfilter_ema_random(
+    m: nn.Module,
+    grads: Optional[Dict[str, torch.Tensor]] = None,
+    alpha: float = 0.98,
+    lamb: float = 2.0,
+) -> Dict[str, torch.Tensor]:
+    """Add a random direction with the same norm as lamb * EMA(g), per parameter tensor."""
+    if grads is None:
+        grads = {n: p.grad.data.detach() for n, p in m.named_parameters() if p.requires_grad and p.grad is not None}
+
+    for n, p in m.named_parameters():
+        if p.requires_grad and p.grad is not None:
+            grads[n] = grads[n] * alpha + p.grad.data.detach() * (1 - alpha)
+            noise = torch.randn_like(p.grad.data)
+            noise *= (grads[n] * lamb).norm() / noise.norm().clamp_min(1e-12)
+            p.grad.data = p.grad.data + noise
+
+    return grads
