@@ -1,4 +1,5 @@
 import math
+import os
 from argparse import ArgumentParser
 from itertools import permutations
 import copy
@@ -140,6 +141,7 @@ def main(args):
     its, train_acc, val_acc, train_loss, val_loss = [], [], [], [], []
     grads = None
     i = 0
+    first_hit = None  # step at which val acc first reached --stop_threshold
 
     # For logging network weights.
     net_its, nets = [], []
@@ -200,11 +202,22 @@ def main(args):
                 val_acc.append(total_acc / valid_data.shape[-1])
                 val_loss.append(total_loss / valid_data.shape[-1])
 
+        # Early stop: end the run once val acc has stayed at or above the
+        # threshold for --stop_patience optimization steps.
+        stop = False
+        if args.stop_threshold is not None:
+            if val_acc[-1] >= args.stop_threshold:
+                first_hit = i if first_hit is None else first_hit
+                stop = i - first_hit >= args.stop_patience
+            else:
+                first_hit = None
+
+        last_epoch = e == int(args.budget) // steps_per_epoch - 1
         if args.save_weights:
-            do_save = e <= 500 or (e > 500 and (e + 1) % 100 == 0) or e == int(args.budget) // steps_per_epoch - 1
+            do_save = e <= 500 or (e > 500 and (e + 1) % 100 == 0) or last_epoch
         else:
-            do_save = (e + 1) % 100 == 0
-        if do_save:
+            do_save = (e + 1) % 100 == 0 or last_epoch
+        if do_save or stop:
             steps = torch.arange(len(train_acc)).numpy() * steps_per_epoch
             plt.plot(steps, train_acc, label="train")
             plt.plot(steps, val_acc, label="val")
@@ -214,7 +227,7 @@ def main(args):
             plt.ylabel("Accuracy")
             plt.xscale("log", base=10)
             plt.grid()
-            plt.savefig(f"results/acc_{args.label}.png", dpi=150)
+            plt.savefig(f"{args.out_dir}/acc_{args.label}.png", dpi=150)
             plt.close()
 
             plt.plot(steps, train_loss, label="train")
@@ -225,7 +238,7 @@ def main(args):
             plt.ylabel("Loss")
             plt.xscale("log", base=10)
             plt.grid()
-            plt.savefig(f"results/loss_{args.label}.png", dpi=150)
+            plt.savefig(f"{args.out_dir}/loss_{args.label}.png", dpi=150)
             plt.close()
 
             results = {
@@ -242,7 +255,11 @@ def main(args):
                 results['net_its'] = net_its
                 results['net'] = nets
 
-            torch.save(results, f"results/res_{args.label}.pt")
+            torch.save(results, f"{args.out_dir}/res_{args.label}.pt")
+
+        if stop:
+            print(f"Stopping at step {i}: val acc >= {args.stop_threshold} since step {first_hit}")
+            break
 
 
 if __name__ == "__main__":
@@ -267,7 +284,13 @@ if __name__ == "__main__":
     # Ablation studies
     parser.add_argument("--two_stage", action='store_true')
     parser.add_argument("--save_weights", action='store_true')
+
+    # Early stopping and output location
+    parser.add_argument("--stop_threshold", type=float, default=None)
+    parser.add_argument("--stop_patience", type=int, default=1000)
+    parser.add_argument("--out_dir", default="results")
     args = parser.parse_args()
+    os.makedirs(args.out_dir, exist_ok=True)
 
     filter_str = ('_' if args.label != '' else '') + args.filter
     window_size_str = f'_w{args.window_size}'
