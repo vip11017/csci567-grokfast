@@ -161,3 +161,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 IMDB-Dataset.csv
+
+# MNIST download (main_mnist.py --download_directory defaults to the repo folder)
+MNIST/

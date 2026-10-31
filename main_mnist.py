@@ -81,7 +81,7 @@ loss_function_dict = {
 
 
 def main(args):
-    log_freq = math.ceil(args.optimization_steps / 150)
+    log_freq = args.log_every or math.ceil(args.optimization_steps / 150)
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -104,8 +104,16 @@ def main(args):
     # load dataset
     train = torchvision.datasets.MNIST(root=args.download_directory, train=True, 
         transform=torchvision.transforms.ToTensor(), download=True)
-    test = torchvision.datasets.MNIST(root=args.download_directory, train=False, 
+    test = torchvision.datasets.MNIST(root=args.download_directory, train=False,
         transform=torchvision.transforms.ToTensor(), download=True)
+    # With --val_points, validation images come from the end of the MNIST training set
+    # and the test set is only evaluated once, at the end. Without it, the test set is
+    # used as the validation set (the paper's setup).
+    if args.val_points:
+        assert args.train_points + args.val_points <= len(train), "train_points + val_points > 60000"
+        val = torch.utils.data.Subset(train, range(len(train) - args.val_points, len(train)))
+    else:
+        val = test
     train = torch.utils.data.Subset(train, range(args.train_points))
     train_loader = torch.utils.data.DataLoader(train, batch_size=args.batch_size, shuffle=True)
 
@@ -142,6 +150,8 @@ def main(args):
     train_losses, test_losses, train_accuracies, test_accuracies = [], [], [], []
     norms, last_layer_norms, log_steps = [], [], []
     grads = None
+    first_hit = None  # step at which val acc first reached --stop_threshold
+    stop = False
 
     steps = 0
     one_hots = torch.eye(10, 10).to(device)
@@ -151,9 +161,21 @@ def main(args):
             if do_log:
                 train_losses.append(compute_loss(mlp, train, args.loss_function, device, N=len(train)))
                 train_accuracies.append(compute_accuracy(mlp, train, device, N=len(train)))
-                test_losses.append(compute_loss(mlp, test, args.loss_function, device, N=len(test)))
-                test_accuracies.append(compute_accuracy(mlp, test, device, N=len(test)))
+                test_losses.append(compute_loss(mlp, val, args.loss_function, device, N=len(val)))
+                test_accuracies.append(compute_accuracy(mlp, val, device, N=len(val)))
                 log_steps.append(steps)
+
+                # Early stop once val acc has stayed >= threshold for --stop_patience steps;
+                # abort runs that still can't fit the training set at --abort_step.
+                if args.stop_threshold is not None:
+                    if test_accuracies[-1] >= args.stop_threshold:
+                        first_hit = steps if first_hit is None else first_hit
+                        stop = steps - first_hit >= args.stop_patience
+                    else:
+                        first_hit = None
+                if args.abort_step is not None and steps >= args.abort_step and train_accuracies[-1] < args.abort_train_acc:
+                    print(f"Aborting at step {steps}: train acc {train_accuracies[-1]:.3f} < {args.abort_train_acc}")
+                    stop = True
 
                 pbar.set_description(
                     "L: {0:1.1e}|{1:1.1e}. A: {2:2.1f}%|{3:2.1f}%".format(
@@ -193,7 +215,22 @@ def main(args):
             steps += 1
             pbar.update(1)
 
-            if do_log:
+            last_step = steps == args.optimization_steps
+            if do_log or last_step:
+                results = {
+                    'its': log_steps,
+                    'train_acc': train_accuracies,
+                    'train_loss': train_losses,
+                    'val_acc': test_accuracies,
+                    'val_loss': test_losses,
+                }
+                if args.val_points and (stop or last_step):
+                    results['test_acc'] = compute_accuracy(mlp, test, device, N=len(test))
+                torch.save(results, f"{args.out_dir}/mnist_{args.label}.pt")
+
+            # Plots are redrawn on the original logging schedule only, since redrawing them
+            # on every log is slow when --log_every is small.
+            if (do_log and steps % math.ceil(args.optimization_steps / 150) == 1) or stop or last_step:
                 title = (f"MNIST Image Classification")
 
                 plt.plot(log_steps, train_accuracies, label="train")
@@ -204,7 +241,7 @@ def main(args):
                 plt.ylabel("Accuracy")
                 plt.xscale("log", base=10)
                 plt.grid()
-                plt.savefig(f"results/mnist_acc_{args.label}.png", dpi=150)
+                plt.savefig(f"{args.out_dir}/mnist_acc_{args.label}.png", dpi=150)
                 plt.close()
 
                 plt.plot(log_steps, train_losses, label="train")
@@ -216,16 +253,13 @@ def main(args):
                 plt.xscale("log", base=10)
                 plt.yscale("log", base=10)
                 plt.grid()
-                plt.savefig(f"results/mnist_loss_{args.label}.png", dpi=150)
+                plt.savefig(f"{args.out_dir}/mnist_loss_{args.label}.png", dpi=150)
                 plt.close()
 
-                torch.save({
-                    'its': log_steps,
-                    'train_acc': train_accuracies,
-                    'train_loss': train_losses,
-                    'val_acc': test_accuracies,
-                    'val_loss': test_losses,
-                }, f"results/mnist_{args.label}.pt")
+            if stop:
+                if first_hit is not None:
+                    print(f"Stopping at step {steps}: val acc >= {args.stop_threshold} since step {first_hit}")
+                break
 
 
 if __name__ == '__main__':
@@ -251,7 +285,18 @@ if __name__ == '__main__':
     parser.add_argument("--alpha", type=float, default=0.99)
     parser.add_argument("--window_size", type=int, default=100)
     parser.add_argument("--lamb", type=float, default=5.0)
+
+    # Validation split, logging and early stopping (defaults keep the paper's setup)
+    parser.add_argument("--val_points", type=int, default=0,
+                        help="hold out this many training images for validation; the test set is then used once, at the end")
+    parser.add_argument("--log_every", type=int, default=None, help="evaluate every N steps (default: ~150 times per run)")
+    parser.add_argument("--stop_threshold", type=float, default=None)
+    parser.add_argument("--stop_patience", type=int, default=1000)
+    parser.add_argument("--abort_step", type=int, default=None)
+    parser.add_argument("--abort_train_acc", type=float, default=0.5)
+    parser.add_argument("--out_dir", default="results")
     args = parser.parse_args()
+    Path(args.out_dir).mkdir(parents=True, exist_ok=True)
 
     filter_str = ('_' if args.label != '' else '') + args.filter
     window_size_str = f'_w{args.window_size}'

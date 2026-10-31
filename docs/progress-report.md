@@ -10,7 +10,7 @@ Everything here is on the `salman` branch.
 | Replication (paper's Table 3) | **Done**, 3 seeds | `docs/results-replication.md` |
 | H2: weight decay vs. the filter | **Done**, 75 runs | `docs/results-h2.md` |
 | H1: momentum vs. slow gradients | **Running**, 13 of 42 runs | Preliminary numbers below |
-| H3: induced grokking conditions (MNIST) | Not started | Open |
+| H3: induced grokking conditions (MNIST) | Not started; code and a draft grid are ready | Notebook section 8 |
 
 ## How we ran the experiments
 
@@ -128,7 +128,11 @@ scales {1, 3, 8}, with a held-out test set. Two things we found while reading th
 - The README's Grokfast commands for MNIST, IMDb and QM9 never turn the filter on (the scripts
   default to no filter), so set `--filter ema` explicitly.
 
-`main_mnist.py` still needs the stopping options that `main.py` has.
+Ready for whoever takes H3: `main_mnist.py` now has a validation split carved from the training
+set (`--val_points`, with the test set scored once at the end), finer logging (`--log_every`)
+and the same stopping options as `main.py`. Notebook section 8 has a draft 81-run grid
+(train size × initialization scale × {paper baseline, no filter at weight decay 2.0,
+Grokfast-EMA}), tested on a shortened run. See `docs/how-to-run-experiments.md`.
 
 ## What's open
 
@@ -141,6 +145,7 @@ scales {1, 3, 8}, with a held-out test set. Two things we found while reading th
 
 ## Changes to the paper's code
 
+- `main_mnist.py`: `--val_points`, `--log_every`, the same stopping options and `--out_dir`.
 - `main.py`: stopping options (`--stop_threshold`, `--stop_patience`, `--abort_step`,
   `--abort_train_acc`), `--out_dir`, SGD with `--momentum`, and the new filters.
 - `grokfast.py`: two control filters for H1, `gradfilter_ema_highpass` and
@@ -158,4 +163,5 @@ scales {1, 3, 8}, with a held-out test set. Two things we found while reading th
 | `docs/results-replication.md` | Replication write-up |
 | `docs/results-h2.md` | H2 write-up |
 | `docs/progress-report.md` | This file |
+| `docs/how-to-run-experiments.md` | How to run or add an experiment in the notebook |
 | `results/replication/`, `results/h2/` | Saved runs (training curves) |
