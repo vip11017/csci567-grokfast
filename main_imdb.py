@@ -222,8 +222,8 @@ def main(args):
 
     #######
 
-    train_loss_min = np.Inf
-    valid_loss_min = np.Inf
+    train_loss_min = np.inf
+    valid_loss_min = np.inf
     train_acc_max = 0.
     valid_acc_max = 0.
 
