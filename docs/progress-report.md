@@ -10,7 +10,7 @@ Everything here is on the `salman` branch.
 | Replication (paper's Table 3) | **Done**, 3 seeds | `docs/results-replication.md` |
 | Full replication (ablations, MNIST, QM9, IMDb) | Set up, runs after H1 | Notebook section 5.2–5.5 |
 | H2: weight decay vs. the filter | **Done**, 75 runs | `docs/results-h2.md` |
-| H1: momentum vs. slow gradients | **Running**, 13 of 42 runs | Preliminary numbers below |
+| H1: momentum vs. slow gradients | **Paused** at 26 of 42 runs, for handoff | `docs/results-h1-partial.md` |
 | H3: induced grokking conditions (MNIST) | Not started; code and a draft grid are ready | Notebook section 8 |
 
 ## How we ran the experiments
@@ -94,30 +94,15 @@ Grokfast-MA at the paper's settings: 0.9 / 0.9 (from the replication).
 Grokfast's real advantage is that generalization sticks once it arrives, especially with MA.
 Full write-up and plot: `docs/results-h2.md`.
 
-## 3. H1: is it just more momentum, or the slow part of the gradient? (running)
+## 3. H1: is it just more momentum, or the slow part of the gradient? (paused)
 
-**Design.** 42 runs with Adam at weight decay 0 and 0.005, 3 seeds:
-- filters at the same strength (λ 2, α 0.98): none, Grokfast-EMA, a **high-pass** version that
-  amplifies the *fast* part of the gradient instead, and a **random** term of the same size as
-  Grokfast's (new filters in `grokfast.py`)
-- more Adam momentum with no filter: β₁ ∈ {0.95, 0.98, 0.99} (default 0.9)
+42 runs with Adam at weight decay 0 and 0.005, 3 seeds: filters at the same strength (none,
+Grokfast-EMA, a high-pass version that amplifies the *fast* part, and a random term of the same
+size), plus more Adam momentum (β₁ 0.95 / 0.98 / 0.99) with no filter.
 
-**Preliminary numbers, seed 0 only** (steps to first reach 95%, thousands; 13 of 42 runs done):
-
-| | Weight decay 0 | Weight decay 0.005 |
-|---|---|---|
-| No filter (β₁ 0.9) | 56.8 | 8.5 |
-| No filter, β₁ 0.95 / 0.98 / 0.99 | 43.6 / 40.3 / 27.1 | 8.8 / fail / fail |
-| Grokfast-EMA | **8.1** | **0.9** |
-| High-pass | not reached by 65k | 14.7, then crashed |
-| Random term | not reached by 53k | 1.7 |
-
-Early pattern, to be checked on seeds 1 and 2: more momentum helps somewhat (up to about 2×)
-but doesn't come close to Grokfast; amplifying the fast part blocks learning; and without weight
-decay only the slow (EMA) filter gives a big speedup, which supports the paper's mechanism. With
-weight decay, even the random term nearly matches EMA, consistent with H2's point that anything
-added to the gradient before Adam weakens the effective decay. Seed 1 so far follows the same
-pattern. Expected to finish tonight.
+Paused after 26 of 42 runs so the full paper replication could run first, and to hand H1 to a
+teammate. The raw per-seed numbers, which runs are finished or partial, and how to resume are in
+`docs/results-h1-partial.md`. Interpretation and write-up are left to H1's owner.
 
 ## 4. H3: does it only work in artificial grokking setups? (not started)
 
