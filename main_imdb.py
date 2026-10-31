@@ -332,7 +332,7 @@ def main(args):
         tqdm.write(f"Epochs: {epoch} | epoch avg. acc: {epoch_acc:.3f} | "
                    f"test avg. acc: {test_epoch_acc:.3f}")
 
-        if (epoch + 1) % 100 == 0 or step == args.iterations - 1:
+        if (epoch + 1) % 100 == 0 or step >= args.iterations - 1:
 
             title = (f"IMDb Binary Sentiment Analysis")
 
