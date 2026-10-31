@@ -4,9 +4,7 @@ Every experiment in the Grokfast paper, rerun with the official scripts on a Col
 `salman` branch, 3 seeds each (seed 0, 1, 2). Runs are defined and analyzed in section 5 of
 `notebooks/grokfast_experiments.ipynb` and saved in `results/replication/` and `results/paper_*/`.
 
-**Status (October 31, 2026):** Table 3, the ablations, QM9 and IMDb are complete. MNIST has 5 of 9
-runs; the remaining 4 are still training, and the cells marked "running" will be filled in
-when they finish.
+**Status (October 31, 2026):** complete. Every configuration has all 3 seeds.
 
 ## Summary
 
@@ -15,7 +13,7 @@ when they finish.
 | Grokfast-MA/EMA grok ~50× faster on x·y mod 97 (Table 3) | **Yes, the Grokfast numbers** | Seed 0 matches exactly. Our baseline is slower and more variable than the paper's single run. |
 | Window and λ each have a sweet spot at w = 100, λ = 5 (ablations) | **Yes** | Same ranking across all 3 seeds. |
 | 2-stage beats 1-stage; the slow component alone fails (Figs. 4–5) | **Yes** | Slow-only never learned in any seed. |
-| MNIST: 44,022 → 2,001 steps, 89.8% → 91.2% (Table 4) | **Numbers yes, cause no** | The no-filter run with the same weight decay also gets 2,001 steps. |
+| MNIST: 44,022 → 2,001 steps, 89.8% → 91.2% (Table 4) | **Numbers yes, cause no** | The no-filter run with the same weight decay is just as fast; the filter adds at most 0.6 points of accuracy. |
 | QM9: lower validation loss (Table 5) | **Not confirmed** | Different loss scale; Grokfast is best in 2 seeds and worst in 1. |
 | IMDb: 0.84 → 0.90 accuracy, 0.517 → 0.412 loss (Table 6) | **Numbers roughly, cause no** | Weight decay alone gives the same gain. |
 
@@ -73,22 +71,25 @@ Steps to first reach 95% validation accuracy:
 
 The paper's setup: a 3-layer MLP trained on 1,000 MNIST images with weights scaled up 8× at
 initialization. The paper reports steps "@ 95% Val. Acc.", but its baseline never gets above 90%;
-the threshold that reproduces its numbers is **85%**. Two commands from the README:
+the threshold that reproduces its numbers is **85%**. Three runs:
 
 - **base:** no filter, weight decay 0.01 (the README baseline)
 - **readme:** the README's "Grokfast" command run as written. It sets α, λ and weight decay 2.0
   but never passes `--filter`, so the filter is off.
 - **ema:** the same command plus `--filter ema`, which is what the paper describes.
 
-| Run | Steps to first 85% (seeds 0 / 1 / 2) | Final val acc | Paper |
-|---|---|---|---|
-| base | 43,355 / 48,691 / running | 89.3% / 88.3% | 44,022 steps, 89.8% |
-| readme (no filter, weight decay 2.0) | 2,001 / 1,334 / running | 90.6% / 90.6% | |
-| ema (filter, weight decay 2.0) | 2,001 / running / running | 90.7% (best 91.6%) | 2,001 steps, 91.2% |
+| Run | Steps to first 85% (seeds 0 / 1 / 2) | Median | Final val acc (median) | Best val acc (median) | Paper |
+|---|---|---|---|---|---|
+| base | 43,355 / 48,691 / 45,356 | 45,356 | 89.3% | 89.3% | 44,022 steps, 89.8% |
+| readme (no filter, weight decay 2.0) | 2,001 / 1,334 / 2,668 | 2,001 | 90.6% | 91.1% | |
+| ema (filter, weight decay 2.0) | 2,001 / 1,334 / 2,001 | 2,001 | 90.7% | 91.6% | 2,001 steps, 91.2% |
 
-- **The paper's numbers reproduce**, including the 2,001-step Grokfast result.
-- **The filter doesn't cause them.** Without the filter, weight decay 2.0 also reaches 85% at
-  step 2,001 (seed 0) and ends at the same accuracy. The speedup comes from the weight decay.
+- **The paper's numbers reproduce**: the baseline needs about 45k steps and ends near 89–90%,
+  and Grokfast needs 2,001 steps and ends near 91%.
+- **The filter isn't what causes them.** Without the filter, weight decay 2.0 reaches 85% at the
+  same evaluation in seeds 0 and 1 (one evaluation later in seed 2), and gets about 1.3 points
+  of final accuracy over the baseline by itself. On top of that, the filter changes final accuracy
+  by −0.1 to +0.4 points and best accuracy by 0 to +0.6 points, depending on the seed.
 - Caveat: these runs evaluate every ~667 steps (the script's own schedule), so steps are only
   resolved to that granularity; 2,001 is the third evaluation.
 
