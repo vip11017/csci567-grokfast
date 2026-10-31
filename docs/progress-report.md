@@ -8,7 +8,7 @@ Everything here is on the `salman` branch.
 | Paper reading and analysis | Done | `docs/reading-guide.md`, `docs/ideas.md`, team summary doc |
 | Code set up and running | Done | Runs on Mac (MPS), Windows (CPU) and Colab (T4 GPU) |
 | Replication (paper's Table 3) | **Done**, 3 seeds | `docs/results-replication.md` |
-| Full replication (ablations, MNIST, QM9, IMDb) | Set up, runs after H1 | Notebook section 5.2–5.5 |
+| Full replication (ablations, MNIST, QM9, IMDb) | Ablations and IMDb done; MNIST and QM9 finishing | `docs/results-replication-full.md` |
 | H2: weight decay vs. the filter | **Done**, 75 runs | `docs/results-h2.md` |
 | H1: momentum vs. slow gradients | **Paused** at 26 of 42 runs, for handoff | `docs/results-h1-partial.md` |
 | H3: induced grokking conditions (MNIST) | Not started; code and a draft grid are ready | Notebook section 8 |
@@ -146,7 +146,8 @@ Grokfast-EMA}), tested on a shortened run. See `docs/how-to-run-experiments.md`.
 | `docs/reading-guide.md` | How to read the paper, key numbers, terms |
 | `docs/ideas.md` | Project ideas and early notes |
 | `docs/ta-summary.html` / `.pdf` | One-page brief for the TA meeting |
-| `docs/results-replication.md` | Replication write-up |
+| `docs/results-replication.md` | Replication write-up (Table 3) |
+| `docs/results-replication-full.md` | Every other paper experiment: ablations, MNIST, QM9, IMDb |
 | `docs/results-h2.md` | H2 write-up |
 | `docs/progress-report.md` | This file |
 | `docs/how-to-run-experiments.md` | How to run or add an experiment in the notebook |
