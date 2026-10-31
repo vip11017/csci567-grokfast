@@ -43,8 +43,5 @@ the threshold.
   what H2 tests next.
 - Validation accuracy is also the stopping signal, so there's no separate test split yet.
 
-Reproduce the table and plot with:
-
-```bash
-python analysis/summarize_runs.py results/replication --plot docs/figures/replication_val_acc.png
-```
+The table and plot come from section 5 (Replication) of
+`notebooks/grokfast_experiments.ipynb`, which reads the saved runs in `results/replication/`.
