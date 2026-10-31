@@ -184,6 +184,8 @@ def main(args):
                         pass
                     elif args.filter == "ma":
                         grads = gradfilter_ma(model, grads=grads, window_size=args.window_size, lamb=args.lamb, trigger=trigger)
+                    elif args.filter == "ma_slow":
+                        grads = gradfilter_ma_slow(model, grads=grads, window_size=args.window_size, lamb=args.lamb, trigger=trigger)
                     elif args.filter == "ema":
                         grads = gradfilter_ema(model, grads=grads, alpha=args.alpha, lamb=args.lamb)
                     elif args.filter == "ema_hp":
@@ -291,7 +293,7 @@ if __name__ == "__main__":
 
     # Grokfast
     parser.add_argument("--momentum", type=float, default=0.9, help="only used with --optimizer SGD")
-    parser.add_argument("--filter", type=str, choices=["none", "ma", "ema", "ema_hp", "ema_rand"], default="none")
+    parser.add_argument("--filter", type=str, choices=["none", "ma", "ma_slow", "ema", "ema_hp", "ema_rand"], default="none")
     parser.add_argument("--alpha", type=float, default=0.99)
     parser.add_argument("--window_size", type=int, default=100)
     parser.add_argument("--lamb", type=float, default=5.0)
@@ -316,7 +318,7 @@ if __name__ == "__main__":
 
     if args.filter == 'none':
         filter_suffix = ''
-    elif args.filter == 'ma':
+    elif args.filter in ('ma', 'ma_slow'):
         filter_suffix = window_size_str + lamb_str
     elif args.filter in ('ema', 'ema_hp', 'ema_rand'):
         filter_suffix = alpha_str + lamb_str

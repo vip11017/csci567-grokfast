@@ -50,6 +50,28 @@ def gradfilter_ema(
     return grads
 
 
+def gradfilter_ma_slow(
+    m: nn.Module,
+    grads: Optional[Dict[str, deque]] = None,
+    window_size: int = 100,
+    lamb: float = 5.0,
+    trigger: bool = False,
+) -> Dict[str, deque]:
+    """Slow component only (paper Section 2.3, Q1 and Figure 5): replace the gradient with
+    lamb * Avg(window) instead of adding it. Like gradfilter_ma, the gradient is left unchanged
+    until the window is full, or while `trigger` is set (two-stage training)."""
+    if grads is None:
+        grads = {n: deque(maxlen=window_size) for n, p in m.named_parameters() if p.requires_grad and p.grad is not None}
+
+    for n, p in m.named_parameters():
+        if p.requires_grad and p.grad is not None:
+            grads[n].append(p.grad.data.detach())
+            if len(grads[n]) == window_size and not trigger:
+                p.grad.data = sum(grads[n]) / len(grads[n]) * lamb
+
+    return grads
+
+
 # Control filters for testing whether the *slow* part of the gradient is what matters.
 # Both keep the same EMA state as gradfilter_ema.
 

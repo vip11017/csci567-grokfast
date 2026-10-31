@@ -1,3 +1,4 @@
+import os
 from argparse import ArgumentParser
 
 import torch
@@ -75,7 +76,7 @@ def main(args):
 
 
     # Load the QM9 small molecule dataset
-    dset = QM9('.')
+    dset = QM9(args.data_dir)
     dset = dset[:args.size]
     train_set, test_set = random_split(dset, [int(args.size / 2), int(args.size / 2)])
     trainloader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
@@ -178,7 +179,7 @@ def main(args):
             plt.xscale("log", base=10)
             plt.ylim(1e-4, 100)
             plt.grid()
-            plt.savefig(f"results/qm9_loss_{args.label}.png", dpi=150)
+            plt.savefig(f"{args.out_dir}/qm9_loss_{args.label}.png", dpi=150)
             plt.close()
 
             torch.save({
@@ -192,7 +193,7 @@ def main(args):
                 'val_avg_loss': test_avg_losses,
                 'train_best': train_best,
                 'val_best': test_best,
-            }, f"results/qm9_{args.label}.pt")
+            }, f"{args.out_dir}/qm9_{args.label}.pt")
 
     #######
 
@@ -209,7 +210,7 @@ def main(args):
     ax.set_ylim(1e-3, 1e2)
     ax.grid()
 
-    fig.savefig(f"results/qm9_grok_{args.label}.pdf", bbox_inches="tight")
+    fig.savefig(f"{args.out_dir}/qm9_grok_{args.label}.pdf", bbox_inches="tight")
     plt.close()
 
 
@@ -228,7 +229,10 @@ if __name__ == "__main__":
     parser.add_argument("--alpha", type=float, default=0.99)
     parser.add_argument("--window_size", type=int, default=100)
     parser.add_argument("--lamb", type=float, default=5.0)
+    parser.add_argument("--out_dir", default="results")
+    parser.add_argument("--data_dir", default=".", help="where QM9 is downloaded")
     args = parser.parse_args()
+    os.makedirs(args.out_dir, exist_ok=True)
 
     filter_str = ('_' if args.label != '' else '') + args.filter
     window_size_str = f'_w{args.window_size}'

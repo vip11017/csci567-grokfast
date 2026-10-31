@@ -1,3 +1,4 @@
+import os
 import string
 import re
 import warnings
@@ -115,7 +116,7 @@ def main(args):
     print(f"Using Device: {device}")
 
 
-    base_csv = './IMDB-Dataset.csv'
+    base_csv = args.data_path
     df = pd.read_csv(base_csv)
 
     X, y = df[:args.size]['review'].values, df[:args.size]['sentiment'].values
@@ -343,7 +344,7 @@ def main(args):
             plt.ylabel("Accuracy")
             plt.xscale("log", base=10)
             plt.grid()
-            plt.savefig(f"results/imdb_acc_{args.label}.png", dpi=150)
+            plt.savefig(f"{args.out_dir}/imdb_acc_{args.label}.png", dpi=150)
             plt.close()
 
             plt.plot(np.arange(step), train_losses, label="train")
@@ -355,7 +356,7 @@ def main(args):
             plt.xscale("log", base=10)
             plt.yscale("log", base=10)
             plt.grid()
-            plt.savefig(f"results/imdb_loss_{args.label}.png", dpi=150)
+            plt.savefig(f"{args.out_dir}/imdb_loss_{args.label}.png", dpi=150)
             plt.close()
 
             torch.save({
@@ -369,7 +370,7 @@ def main(args):
                 'val_loss': test_losses,
                 'val_avg_acc': test_avg_accs,
                 'val_avg_loss': test_avg_losses,
-            }, f"results/imdb_{args.label}.pt")
+            }, f"{args.out_dir}/imdb_{args.label}.pt")
 
         epoch += 1
 
@@ -391,7 +392,10 @@ if __name__ == "__main__":
     parser.add_argument("--alpha", type=float, default=0.99)
     parser.add_argument("--window_size", type=int, default=100)
     parser.add_argument("--lamb", type=float, default=5.0)
+    parser.add_argument("--out_dir", default="results")
+    parser.add_argument("--data_path", default="./IMDB-Dataset.csv")
     args = parser.parse_args()
+    os.makedirs(args.out_dir, exist_ok=True)
 
     model_suffix = f'size{args.size}_alpha{args.init_scale:.4f}'
 

@@ -8,6 +8,7 @@ Everything here is on the `salman` branch.
 | Paper reading and analysis | Done | `docs/reading-guide.md`, `docs/ideas.md`, team summary doc |
 | Code set up and running | Done | Runs on Mac (MPS), Windows (CPU) and Colab (T4 GPU) |
 | Replication (paper's Table 3) | **Done**, 3 seeds | `docs/results-replication.md` |
+| Full replication (ablations, MNIST, QM9, IMDb) | Set up, runs after H1 | Notebook section 5.2–5.5 |
 | H2: weight decay vs. the filter | **Done**, 75 runs | `docs/results-h2.md` |
 | H1: momentum vs. slow gradients | **Running**, 13 of 42 runs | Preliminary numbers below |
 | H3: induced grokking conditions (MNIST) | Not started; code and a draft grid are ready | Notebook section 8 |
