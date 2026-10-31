@@ -4,9 +4,9 @@ Every experiment in the Grokfast paper, rerun with the official scripts on a Col
 `salman` branch, 3 seeds each (seed 0, 1, 2). Runs are defined and analyzed in section 5 of
 `notebooks/grokfast_experiments.ipynb` and saved in `results/replication/` and `results/paper_*/`.
 
-**Status (October 31, 2026):** Table 3, the ablations and IMDb are complete. MNIST has 5 of 9
-runs and QM9 8 of 9; the remaining runs are still training, and the cells marked "running"
-will be filled in when they finish.
+**Status (October 31, 2026):** Table 3, the ablations, QM9 and IMDb are complete. MNIST has 5 of 9
+runs; the remaining 4 are still training, and the cells marked "running" will be filled in
+when they finish.
 
 ## Summary
 
@@ -16,7 +16,7 @@ will be filled in when they finish.
 | Window and λ each have a sweet spot at w = 100, λ = 5 (ablations) | **Yes** | Same ranking across all 3 seeds. |
 | 2-stage beats 1-stage; the slow component alone fails (Figs. 4–5) | **Yes** | Slow-only never learned in any seed. |
 | MNIST: 44,022 → 2,001 steps, 89.8% → 91.2% (Table 4) | **Numbers yes, cause no** | The no-filter run with the same weight decay also gets 2,001 steps. |
-| QM9: lower validation loss (Table 5) | **Partly** | Different loss scale; seed-to-seed spread is larger than the effect. |
+| QM9: lower validation loss (Table 5) | **Not confirmed** | Different loss scale; Grokfast is best in 2 seeds and worst in 1. |
 | IMDb: 0.84 → 0.90 accuracy, 0.517 → 0.412 loss (Table 6) | **Numbers roughly, cause no** | Weight decay alone gives the same gain. |
 
 The recurring finding: on MNIST and IMDb, the paper's "Grokfast" command also changes weight decay
@@ -100,16 +100,16 @@ A small graph network on 100 molecules from QM9, initial weights scaled 3×. Low
 |---|---|---|---|---|
 | base (no filter, no weight decay) | 3.56 | 0.95 | 1.82 | 0.00659 |
 | readme (no filter, weight decay 0.01) | 2.27 | 0.85 | 3.67 | |
-| ema (filter, weight decay 0.01) | 1.77 | 0.71 | running | 0.00348 |
+| ema (filter, weight decay 0.01) | 1.77 | 0.71 | 5.02 | 0.00348 |
+
+Medians: base 1.82, readme 2.27, ema 1.77.
 
 - **Different scale.** The published `main_qm9.py` trains on raw (unnormalized) targets, so our
   losses are about 100–1000× the paper's. Only comparisons within a seed are meaningful.
-- **The filter seems to help beyond weight decay** in seeds 0 and 1 (16–22% lower loss
-  than weight decay alone). This is the only task where the filter itself appears to add
-  something.
-- **But seeds disagree.** In seed 2, weight decay alone made things *worse*, and the spread
-  between seeds is larger than any of the effects. We'll judge this once seed 2's filter run
-  is in.
+- **No consistent effect.** The filter run has the lowest loss in seeds 0 and 1 (16–22% below
+  weight decay alone), but the *highest* in seed 2 (5.02 vs 1.82 for the baseline). Weight
+  decay alone also helps in two seeds and hurts in one. The spread between seeds is larger
+  than any difference between methods, so 3 seeds can't confirm the paper's QM9 claim.
 
 ## 5. IMDb (Table 6)
 
